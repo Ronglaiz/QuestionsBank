@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>主页</title>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <meta name="viewport" content="width=device-width">
+
+    <!-- Bootstrap core CSS -->
+    <link href="/static/bootstrap/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-giJF6kkoqNQ00vy+HMDP7azOuL0xtbfIcaT9wjKHr8RbDVddVHyTfAAsrekwKmP1" crossorigin="anonymous">
+    <meta name="theme-color" content="#7952b3">
+    <!-- UNICORN CSS STYLES -->
+    <link rel="stylesheet" href="http://cdn.bootcss.com/animate.css/3.2.0/animate.min.css">
+    <link rel="stylesheet" href="/static/buttons.css">
+    <!-- div style -->
+    <style>
+        #div1{
+            width: 100px;
+            height: 250px;
+
+            display: flex;
+            align-items: center;
+        }
+    </style>
+</head>
+<body>
+
+
+
+<h1 align="center"> </h1>
+<div id="div1"></div>
+<form align="center" action='/query_normal_questions' method="get">
+    <input class="button button-glow button-border button-rounded button-primary button-giant" type="submit" value="开始刷题" >
+</form>
+<br>
+<form align="center" action='/query_error_questions' method="get">
+    <input class="button button-glow button-border button-rounded button-primary button-giant" type="submit" value="错题查询" >
+</form>
+    {% csrf_token %}
+</body>
+</html>

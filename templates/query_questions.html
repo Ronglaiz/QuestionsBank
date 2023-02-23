@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>所有题目</title>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <meta name="viewport" content="width=device-width">
+    <!-- Bootstrap core CSS -->
+    <link href="/static/bootstrap/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-giJF6kkoqNQ00vy+HMDP7azOuL0xtbfIcaT9wjKHr8RbDVddVHyTfAAsrekwKmP1" crossorigin="anonymous">
+    <meta name="theme-color" content="#7952b3">
+    <!-- Buttons/radio/checkbox Style -->
+    <link rel="stylesheet" href="http://cdn.bootcss.com/animate.css/3.2.0/animate.min.css">
+    <link rel="stylesheet" href="/static/buttons.css">
+    <link rel="stylesheet" href="/static/radio.css">
+    <link rel="stylesheet" href="/static/checkbox.css">
+    <link rel="stylesheet" href="https://www.w3schools.com/w3css/4/w3.css">
+    <style></style>
+</head>
+<script>
+    //前一个问题对应的调用函数
+    function PrevQuestion(){
+        document.main_form.action="/prev_question";
+        document.main_form.submit();
+    }
+    //下一个问题对应的调用函数
+    function NextQuestion(){
+        document.main_form.action="/next_question";
+        document.main_form.submit();
+    }
+
+    //检查答案对应的调用函数
+    function CheckAnswer(){
+        //缓存的正确答案： Correct_Answer
+        let Correct_Answer = "{{ Correct_Answer }}"
+        //radio中点击的正确答案： Selected_Answer
+        let Selected_Answer = null;
+        let obj = document.getElementsByName("raido_list")
+        for (let i = 0; i < obj.length; i++){
+            if(obj[i].checked){
+                Selected_Answer = obj[i].value;
+            }
+        }
+        if (Selected_Answer === Correct_Answer){
+            document.getElementById("checkAnswer_Notification").value = "恭喜!!!答案正确!"
+            //如果答案正确， 那么啥也不做。
+
+        }else{
+            document.getElementById("checkAnswer_Notification").value = "抱歉!!!答案错误!"
+        }
+        //提交数据到后端
+        document.main_form.action="/check_answer";
+        document.main_form.submit();
+    }
+    function QuestionInfo(){
+        let Question_Id = document.getElementById("text_QuestionNo").value;
+        let Question_Answer = document.getElementById("text_Question_Answer").value;
+        let Question_Correct_Rate = document.getElementById("text_Correct_Rate").value;
+        let alert_info = "问题编号：" + Question_Id + "\u000a" + "问题答案：" + Question_Answer + "\u000a" + "正  确  率：" + Question_Correct_Rate;
+        alert(alert_info)
+    }
+
+</script>
+<body>
+<div style="width: 100px; height: 50px; display: flex; align-items: center;"></div>
+<form name="main_form" align="center" method="get">
+    <!-- 在这里选择已经复习过的题目 -->
+<div align="center">
+    <!-- 第一个按钮：上一题 -->
+    <!-- 第二个按钮：下一题 -->
+    <!-- 第三个按钮：当前题目的详细信息 -->
+    <!-- 第四个按钮：答案对比 -->
+    <input class="button button-action button-box button-giant button-longshadow-left" type="button" id = "prevQuestion" name="prevQuestion"  value="上个" onclick="PrevQuestion()">
+    <input class="button button-action button-box button-giant button-longshadow-right" type="button" id = "nextQuestion" name="nextQuestion"  value="下个" onclick="NextQuestion()">
+    <input class="button button-primary button-box button-giant button-longshadow-right" type="button" id = "checkAnswer" name="checkAnswer"  value="信息" onclick="QuestionInfo()">
+    <input class="button button-caution button-box button-raised button-giant button-longshadow" type="button" id = "checkAnswer" name="checkAnswer"  value="答案" onclick="CheckAnswer()">
+    <br>
+    <!-- 几个隐藏的文本框，提示一些信息：问题编号；问题详细内容；问题答案；问题的正确率-->
+    <input style="border:none;outline:medium;text-align:center;" size="5" type="hidden" id = "text_QuestionNo" name="text_QuestionNo" readonly  >
+    <input style="border:none;outline:medium;text-align:center;" size="5" type="hidden" id = "text_Question_Answer" name="text_Question_Answer" readonly >
+    <input style="border:none;outline:medium;text-align:center;" size="5" type="hidden" id = "text_Correct_Rate" name="text_Correct_Rate" readonly >
+    <input style="border:none;outline:medium;text-align:center;" size="5" type="hidden" id = "is_normal_or_error" name="is_normal_or_error" value="{{ is_normal_or_error }}" readonly >
+    <input style="border:none;outline:medium;text-align:center; color:#FF0000;" size="15" type="text" id = "checkAnswer_Notification" name="checkAnswer_Notification" value="{{ checkAnswer_Notification }}" readonly >
+
+    <!-- 这里是显示题目的地方 -->
+    <div style="height: 410px; overflow-y: auto;" align="left">
+        {% for Question_Content_parts in Question_Content_Details_List %}
+        <br>
+        {{ Question_Content_parts }}
+        {% endfor %}
+
+
+    </div>
+    <br>
+    <br>
+</div>
+
+<!-- 答案选择地方 -->
+<div align="center">
+<div class="checkbox-wrapper-10">
+    <!-- ABCD的复选按钮-->
+    <table>
+        <tr>
+            <td>
+            <input class="tgl tgl-flip" id="radio_a" type="radio" autocomplete="off" value="A" name="raido_list" />
+            <label class="tgl-btn" data-tg-off="A" data-tg-on="A" for="radio_a"></label>
+            </td>
+            <td>
+            <input class="tgl tgl-flip" id="radio_b" type="radio" autocomplete="off" value="B" name="raido_list" />
+            <label class="tgl-btn" data-tg-off="B" data-tg-on="B" for="radio_b"></label>
+            </td>
+            <td>
+            <input class="tgl tgl-flip" id="radio_c" type="radio" autocomplete="off" value="C" name="raido_list" />
+            <label class="tgl-btn" data-tg-off="C" data-tg-on="C" for="radio_c"></label>
+            </td>
+            <td>
+            <input class="tgl tgl-flip" id="radio_d" type="radio" autocomplete="off" value="D" name="raido_list" />
+            <label class="tgl-btn" data-tg-off="D" data-tg-on="D" for="radio_d"></label>
+            </td>
+        </tr>
+    </table>
+</div>
+</div>
+</form>
+<br>
+<br>
+<br>
+<form align="center" action='/main_page' method="get">
+    <input class="button button-glow button-rounded button-raised button-primary button-large" type="submit" value="主页" >
+</form>
+<script>
+    //将后端传入的数据放入对应的input里面
+    let Question_Id = "{{ Question_Id_str }}";
+    if(!Question_Id){
+        document.getElementById("text_QuestionNo").value="000";
+    }
+    else{
+        document.getElementById("text_QuestionNo").value=Question_Id;
+    }
+    let Question_Answer = "{{ Correct_Answer }}";
+    document.getElementById("text_Question_Answer").value=Question_Answer;
+    let Question_Correct_Rate = "{{ Question_Correct_Rate }}"
+    document.getElementById("text_Correct_Rate").value=Question_Correct_Rate;
+    let checkAnswer_Notification = "{{ checkAnswer_Notification }}"
+    document.getElementById("checkAnswer_Notification").value=checkAnswer_Notification;
+</script>
+
+</body>
+</html>
