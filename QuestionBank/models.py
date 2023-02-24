@@ -5,7 +5,7 @@ from django.db import models
 class QuestionsBank(models.Model):
     QuestionId = models.IntegerField(primary_key=True)
     QuestionContent = models.TextField()
-    QuestionAnswer = models.CharField(max_length=1)
+    QuestionAnswer = models.CharField(max_length=2)
     QuestionFlagged = models.BooleanField()
     QuestionCorrected = models.IntegerField()
     QuestionInCorrected = models.IntegerField()
