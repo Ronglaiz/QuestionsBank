@@ -9,6 +9,7 @@ class QuestionsBank(models.Model):
     QuestionFlagged = models.BooleanField()
     QuestionCorrected = models.IntegerField()
     QuestionInCorrected = models.IntegerField()
+    QuestionComments = models.TextField()
 
 
 # 记录错题信息

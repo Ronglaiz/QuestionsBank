@@ -28,7 +28,9 @@ def query_normal_questions(request):
     Question_Content_Details = query_QuestionsBank(Question_Id_str, "QuestionContent")
     Question_Content_Details_List = process_Question_Content(Question_Content_Details)
     Correct_Answer = query_QuestionsBank(Question_Id_str, "QuestionAnswer")
+    print(Question_Id_str)
     Question_Correct_Rate = correct_rate_cal(Question_Id_str)
+    Questions_Comments = query_QuestionsBank(Question_Id_str, "QuestionComments")
     is_normal_or_error = "0"
     """
     返回数据到前端
@@ -53,6 +55,7 @@ def query_error_questions(request):
     Question_Content_Details_List = process_Question_Content(Question_Content_Details)
     Correct_Answer = query_QuestionsBank(Question_Id_str, "QuestionAnswer")
     Question_Correct_Rate = correct_rate_cal(Question_Id_str)
+    Questions_Comments = query_QuestionsBank(Question_Id_str, "QuestionComments")
     is_normal_or_error = "1"
     """
     返回数据到前端
@@ -97,7 +100,8 @@ def prev_question(request):
         Question_Content_Details = query_QuestionsBank(prevQuestionNo_str, "QuestionContent")
         Correct_Answer = query_QuestionsBank(prevQuestionNo_str, "QuestionAnswer")
         Question_Correct_Rate = correct_rate_cal(prevQuestionNo_str)
-        # 新增加，对选项进行会车换行
+        Questions_Comments = query_QuestionsBank(Question_Id_str, "QuestionComments")
+        # 新增加，对选项进行回车换行
         Question_Content_Details_List = process_Question_Content(Question_Content_Details)
         """
         将刷题编号写入数据库QuestioningInfo中
@@ -117,6 +121,7 @@ def next_question(request):
     if currentQuestionNo == "":
         nextQuestionNo_str = "001"
     else:
+        print(is_normal_or_error)
         if is_normal_or_error == "0":
             nextQuestionNo = int(currentQuestionNo) + 1
             nextQuestionNo_str = question_id_convert(nextQuestionNo)
@@ -139,7 +144,8 @@ def next_question(request):
         Question_Content_Details = query_QuestionsBank(nextQuestionNo_str, "QuestionContent")
         Correct_Answer = query_QuestionsBank(nextQuestionNo_str, "QuestionAnswer")
         Question_Correct_Rate = correct_rate_cal(nextQuestionNo_str)
-        # 新增加，对选项进行会车换行
+        Questions_Comments = query_QuestionsBank(Question_Id_str, "QuestionComments")
+        # 新增加，对选项进行回车换行
         Question_Content_Details_List = process_Question_Content(Question_Content_Details)
         """
         将刷题编号写入数据库QuestioningInfo中
@@ -158,23 +164,25 @@ def check_answer(request):
     SelectedAnswer = request.GET.get("raido_list")
     Question_Id_str = request.GET.get("text_QuestionNo")
     checkAnswer_Notification = request.GET.get("checkAnswer_Notification")
-
+    is_normal_or_error = request.GET.get("is_normal_or_error")
     Question_Content_Details = query_QuestionsBank(Question_Id_str, "QuestionContent")
     Question_Content_Details_List = process_Question_Content(Question_Content_Details)
     Correct_Answer = query_QuestionsBank(Question_Id_str, "QuestionAnswer")
-    Question_Correct_Rate = correct_rate_cal(Question_Id_str)
+    Questions_Comments = query_QuestionsBank(Question_Id_str, "QuestionComments")
     try:
         Question_Content = QuestionsBank.objects.get(QuestionId=Question_Id_str)
         QuestionCorrected = Question_Content.QuestionCorrected
         QuestionInCorrected = Question_Content.QuestionInCorrected
         # 将前端传入的答案和正确答案对比
+        print("123")
         if SelectedAnswer == Correct_Answer:
             QuestionCorrected_Count = QuestionCorrected + 1
-            Question_Corrected_or_Not = QuestionsBank.objects.filter(QuestionId=Question_Id_str).update(
+            QuestionsBank.objects.filter(QuestionId=Question_Id_str).update(
                 QuestionCorrected=QuestionCorrected_Count)
         elif SelectedAnswer != Correct_Answer:
-            QuestionInCorrected_Count = QuestionCorrected + 1
-            Question_Corrected_or_Not = QuestionsBank.objects.filter(QuestionId=Question_Id_str).update(
+            QuestionInCorrected_Count = QuestionInCorrected + 1
+            print(QuestionInCorrected_Count)
+            QuestionsBank.objects.filter(QuestionId=Question_Id_str).update(
                 QuestionInCorrected=QuestionInCorrected_Count)
             """这里要加上向QuestionErrorInfo表里插Question_Id_str的步骤"""
             try:
@@ -183,12 +191,38 @@ def check_answer(request):
                 try:
                     max_Question_Id = QuestionErrorInfo.objects.aggregate(Max('id'))
                     max_Question_Id_value = max_Question_Id['id__max']
-                    max_Question_Id_n = max_Question_Id_value + 1
+                    print(max_Question_Id_value)
+                    if max_Question_Id_value is None:
+                        max_Question_Id_n = 1
+                    else:
+                        max_Question_Id_n = max_Question_Id_value + 1
                     QuestionErrorInfo.objects.create(id=max_Question_Id_n, ErrorQuestionId=Question_Id_str)
                 except:
                     DB_Notification = "数据库异常"
     except:
         checkAnswer_Notification = "对比失败！"
+    # 刷新rate
+    Question_Correct_Rate = correct_rate_cal(Question_Id_str)
+    return render(request, "query_questions.html", locals())
+
+
+# 这里是插入comment值的
+def insert_comment(request):
+    comments_posted = request.GET.get('Comments_posted')
+    print(comments_posted)
+    Question_Id_str = request.GET.get("text_QuestionNo")
+    try:
+        prev_comment = query_QuestionsBank(Question_Id_str, "QuestionComments")
+        current_comment = prev_comment + "\n" + comments_posted
+        QuestionsBank.objects.filter(QuestionId=Question_Id_str).update(QuestionComments=current_comment)
+    except:
+        checkAnswer_Notification = "插入备注失败！"
+
+    Question_Content_Details = query_QuestionsBank(Question_Id_str, "QuestionContent")
+    Question_Content_Details_List = process_Question_Content(Question_Content_Details)
+    Correct_Answer = query_QuestionsBank(Question_Id_str, "QuestionAnswer")
+    Question_Correct_Rate = correct_rate_cal(Question_Id_str)
+    Questions_Comments = query_QuestionsBank(Question_Id_str, "QuestionComments")
     return render(request, "query_questions.html", locals())
 
 
@@ -219,6 +253,8 @@ def query_QuestionsBank(query_string, flag):
             return Question_Content.QuestionCorrected
         elif flag == "QuestionInCorrected":
             return Question_Content.QuestionInCorrected
+        elif flag == "QuestionComments":
+            return Question_Content.QuestionComments.replace('\r', '\\r').replace('\n', '\\n')
     except:
         return ""
 
@@ -246,6 +282,8 @@ def correct_rate_cal(Question_Id):
     Question_InCorrected = query_QuestionsBank(Question_Id, "QuestionInCorrected")
     if Question_InCorrected == 0:
         Question_Correct_Rate = "100%"
+        if Question_Corrected == 0:
+            Question_Correct_Rate = "0%"
     else:
         Question_Correct_Rate = '{:.0%}'.format(Question_Corrected / (Question_Corrected + Question_InCorrected))
     return Question_Correct_Rate

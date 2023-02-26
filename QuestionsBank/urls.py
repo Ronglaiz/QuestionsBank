@@ -24,5 +24,6 @@ urlpatterns = [
     path('next_question', views.next_question),
     path('prev_question', views.prev_question),
     path('check_answer', views.check_answer),
+    path('insert_comment', views.insert_comment),
 
 ]

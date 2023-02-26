@@ -13,6 +13,7 @@
     <link rel="stylesheet" href="/static/buttons.css">
     <link rel="stylesheet" href="/static/radio.css">
     <link rel="stylesheet" href="/static/checkbox.css">
+    <link rel="stylesheet" href="/static/hr.css">
     <link rel="stylesheet" href="https://www.w3schools.com/w3css/4/w3.css">
     <style></style>
 </head>
@@ -55,10 +56,30 @@
         let Question_Id = document.getElementById("text_QuestionNo").value;
         let Question_Answer = document.getElementById("text_Question_Answer").value;
         let Question_Correct_Rate = document.getElementById("text_Correct_Rate").value;
-        let alert_info = "问题编号：" + Question_Id + "\u000a" + "问题答案：" + Question_Answer + "\u000a" + "正  确  率：" + Question_Correct_Rate;
+        let Question_Comments = document.getElementById("text_Question_Comments").value;
+        let alert_info = "问题编号：" + Question_Id + "\u000a" + "问题答案：" + Question_Answer + "\u000a" + "正  确  率：" + Question_Correct_Rate + "\u000a" + "问题备注：" + Question_Comments;
         alert(alert_info)
     }
-
+    function MainPage(){
+        //提交数据到后端
+        document.main_form.action="/main_page";
+        document.main_form.submit();
+    }
+    function InsertComments(){
+        //提交数据到后端
+        document.main_form.action="/insert_comment";
+        document.main_form.submit();
+    }
+    function InsertCommentsPrompt() {
+        let name = prompt("请输入备注", "");
+        //这里需要注意的是，prompt有两个参数，前面是提示的话，后面是当对话框出来后，在对话框里的默认值
+        if (name)//如果返回的有内容
+        {
+            document.getElementById("Comments_posted").value=name;
+            document.main_form.action="/insert_comment";
+            document.main_form.submit();
+        }
+    }
 </script>
 <body>
 <div style="width: 100px; height: 50px; display: flex; align-items: center;"></div>
@@ -71,28 +92,20 @@
     <!-- 第四个按钮：答案对比 -->
     <input class="button button-action button-box button-giant button-longshadow-left" type="button" id = "prevQuestion" name="prevQuestion"  value="上个" onclick="PrevQuestion()">
     <input class="button button-action button-box button-giant button-longshadow-right" type="button" id = "nextQuestion" name="nextQuestion"  value="下个" onclick="NextQuestion()">
-    <input class="button button-primary button-box button-giant button-longshadow-right" type="button" id = "checkAnswer" name="checkAnswer"  value="信息" onclick="QuestionInfo()">
+    <input class="button button-primary button-box button-giant button-longshadow-right" type="button" id = "checkInfo" name="checkInfo"  value="信息" onclick="QuestionInfo()">
+    <input class="button button-highlight button-box button-giant button-longshadow-right" type="button" id = "checkComments" name="checkComments"  value="备注" onclick="InsertCommentsPrompt()">
     <input class="button button-caution button-box button-raised button-giant button-longshadow" type="button" id = "checkAnswer" name="checkAnswer"  value="答案" onclick="CheckAnswer()">
+
+
     <br>
     <!-- 几个隐藏的文本框，提示一些信息：问题编号；问题详细内容；问题答案；问题的正确率-->
     <input style="border:none;outline:medium;text-align:center;" size="5" type="hidden" id = "text_QuestionNo" name="text_QuestionNo" readonly  >
     <input style="border:none;outline:medium;text-align:center;" size="5" type="hidden" id = "text_Question_Answer" name="text_Question_Answer" readonly >
     <input style="border:none;outline:medium;text-align:center;" size="5" type="hidden" id = "text_Correct_Rate" name="text_Correct_Rate" readonly >
-    <input style="border:none;outline:medium;text-align:center;" size="5" type="hidden" id = "is_normal_or_error" name="is_normal_or_error" value="{{ is_normal_or_error }}" readonly >
+    <input style="border:none;outline:medium;text-align:center;" size="5" type="hidden" id = "text_Question_Comments" name="text_Question_Comments" readonly >
+    <input style="border:none;outline:medium;text-align:center;" size="5" type="hidden" id = "Comments_posted" name="Comments_posted" readonly >
+    <input style="border:none;outline:medium;text-align:center;" size="5" type="hidden" id = "is_normal_or_error" name="is_normal_or_error" readonly >
     <input style="border:none;outline:medium;text-align:center; color:#FF0000;" size="15" type="text" id = "checkAnswer_Notification" name="checkAnswer_Notification" value="{{ checkAnswer_Notification }}" readonly >
-
-    <!-- 这里是显示题目的地方 -->
-    <div style="height: 410px; overflow-y: auto;" align="left">
-        {% for Question_Content_parts in Question_Content_Details_List %}
-        <br>
-        {{ Question_Content_parts }}
-        {% endfor %}
-
-
-    </div>
-    <br>
-    <br>
-</div>
 
 <!-- 答案选择地方 -->
 <div align="center">
@@ -120,12 +133,27 @@
     </table>
 </div>
 </div>
-</form>
-<br>
-<br>
-<br>
-<form align="center" action='/main_page' method="get">
-    <input class="button button-glow button-rounded button-raised button-primary button-large" type="submit" value="主页" >
+    <!-- 这里是显示题目的地方 -->
+    <table>
+        <tr>
+            <td style="width: 10px"></td>
+            <td>
+                <div style="height: 350px; overflow-y: auto;" align="left">
+                {% for Question_Content_parts in Question_Content_Details_List %}
+                <br>
+                {{ Question_Content_parts }}
+                {% endfor %}
+                </div>
+            </td>
+            <td style="width: 10px"></td>
+        </tr>
+    </table>
+</div>
+<hr class="hr-twill-colorful">
+<div align="center">
+    <input class="button button-block button-rounded button-primary button-large" style="width:300px;"  type="button" id = "checkComments" name="checkComments"  value="主页" onclick="MainPage()">
+    <br>
+</div>
 </form>
 <script>
     //将后端传入的数据放入对应的input里面
@@ -140,8 +168,12 @@
     document.getElementById("text_Question_Answer").value=Question_Answer;
     let Question_Correct_Rate = "{{ Question_Correct_Rate }}"
     document.getElementById("text_Correct_Rate").value=Question_Correct_Rate;
+    let Questions_Comments = "{{ Questions_Comments }}"
+    document.getElementById("text_Question_Comments").value=Questions_Comments;
     let checkAnswer_Notification = "{{ checkAnswer_Notification }}"
     document.getElementById("checkAnswer_Notification").value=checkAnswer_Notification;
+    let is_normal_or_error = "{{ is_normal_or_error }}"
+    document.getElementById("is_normal_or_error").value=is_normal_or_error;
 </script>
 
 </body>
