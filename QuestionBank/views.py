@@ -121,7 +121,6 @@ def next_question(request):
     if currentQuestionNo == "":
         nextQuestionNo_str = "001"
     else:
-        print(is_normal_or_error)
         if is_normal_or_error == "0":
             nextQuestionNo = int(currentQuestionNo) + 1
             nextQuestionNo_str = question_id_convert(nextQuestionNo)
@@ -223,6 +222,38 @@ def insert_comment(request):
     Correct_Answer = query_QuestionsBank(Question_Id_str, "QuestionAnswer")
     Question_Correct_Rate = correct_rate_cal(Question_Id_str)
     Questions_Comments = query_QuestionsBank(Question_Id_str, "QuestionComments")
+    return render(request, "query_questions.html", locals())
+
+
+def question_list(request):
+    Question_list = QuestionsBank.objects.all()
+    question_id_list = []
+    for i in range(Question_list.count()):
+        question_id_list.append(Question_list[i].QuestionId)
+    return render(request, "question_list.html", locals())
+
+
+def show_question_details(request):
+    currentQuestionNo = request.GET.get("text_QuestionNo")
+    is_normal_or_error = "0"
+    if currentQuestionNo == "":
+        nextQuestionNo_str = "001"
+    else:
+        """
+        根据nextQuestionNo_str查询QuestionsBank表，获取下一个问题信息。
+        """
+        try:
+            Question_Id = query_QuestionsBank(currentQuestionNo, "QuestionId")
+            Question_Id_str = question_id_convert(Question_Id)
+            Question_Content_Details = query_QuestionsBank(currentQuestionNo, "QuestionContent")
+            Correct_Answer = query_QuestionsBank(currentQuestionNo, "QuestionAnswer")
+            Question_Correct_Rate = correct_rate_cal(currentQuestionNo)
+            Questions_Comments = query_QuestionsBank(Question_Id_str, "QuestionComments")
+            # 新增加，对选项进行回车换行
+            Question_Content_Details_List = process_Question_Content(Question_Content_Details)
+        except:
+            checkAnswer_Notification = "查询失败"
+
     return render(request, "query_questions.html", locals())
 
 

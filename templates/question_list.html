@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>题目集合</title>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <meta name="viewport" content="width=device-width">
+    <!-- Bootstrap core CSS -->
+    <link href="/static/bootstrap/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-giJF6kkoqNQ00vy+HMDP7azOuL0xtbfIcaT9wjKHr8RbDVddVHyTfAAsrekwKmP1" crossorigin="anonymous">
+    <meta name="theme-color" content="#7952b3">
+    <!-- Buttons/radio/checkbox Style -->
+    <link rel="stylesheet" href="http://cdn.bootcss.com/animate.css/3.2.0/animate.min.css">
+    <link rel="stylesheet" href="/static/buttons.css">
+    <link rel="stylesheet" href="/static/radio.css">
+    <link rel="stylesheet" href="/static/checkbox.css">
+    <link rel="stylesheet" href="https://www.w3schools.com/w3css/4/w3.css">
+    <style></style>
+</head>
+<script>
+    function question_list(question_id){
+        document.getElementById("text_QuestionNo").value = question_id;
+        //提交数据到后端
+        document.main_form.action="/show_question_details";
+        document.main_form.submit();
+    }
+</script>
+<body>
+<br>
+<form align="center" action='/main_page' method="get">
+    <input class="button button-glow button-rounded button-raised button-primary button-large" type="submit" value="主页" >
+</form>
+<div style="width: 100px; height: 50px; display: flex; align-items: center;"></div>
+<form name="main_form" align="center" method="get">
+    <!-- 在这里选择已经复习过的题目 -->
+    <input type="hidden" id="text_QuestionNo" name="text_QuestionNo">
+    {% for question_id in question_id_list %}
+        <input class="button button-glow button-circle button-action button-jumbo" type="button" id = "prevQuestion" name="prevQuestion"  value="{{ question_id }}" onclick="question_list({{ question_id }})">
+    {% endfor %}
+</div>
+</form>
+</body>
+</html>
