@@ -208,7 +208,7 @@ def check_answer(request):
 # 这里是插入comment值的
 def insert_comment(request):
     comments_posted = request.GET.get('Comments_posted')
-    print(comments_posted)
+    is_normal_or_error = request.GET.get('is_normal_or_error')
     Question_Id_str = request.GET.get("text_QuestionNo")
     try:
         prev_comment = query_QuestionsBank(Question_Id_str, "QuestionComments")
