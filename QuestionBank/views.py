@@ -226,10 +226,11 @@ def insert_comment(request):
 
 
 def question_list(request):
-    Question_list = QuestionsBank.objects.all()
+    # Question_list = QuestionsBank.objects.all()
+    Question_list = QuestionErrorInfo.objects.all()
     question_id_list = []
     for i in range(Question_list.count()):
-        question_id_list.append(Question_list[i].QuestionId)
+        question_id_list.append(Question_list[i].ErrorQuestionId)
     return render(request, "question_list.html", locals())
 
 
